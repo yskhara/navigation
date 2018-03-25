@@ -1,0 +1,46 @@
+UselessPlanner:
+
+# Robot Configuration Parameters - TR
+
+#  vel_lim_lin: 1.5 # choose slightly less than the base's capability
+#  vel_lim_ang: 1.5  # choose slightly less than the base's capability
+
+  vel_lim_lin: 2.00 # choose slightly less than the base's capability
+  
+  # 遅い？
+  # 回転角速度の最大値を上げるとき，k_angを適度に小さくしなきゃいけないと思う
+  vel_lim_ang: 0.70
+  
+#  acc_lim_lin: 2.0 # maximum is theoretically 2.0, but we 
+#  acc_lim_ang: 1.5
+  
+  acc_lim_lin: 2.50 # maximum is theoretically 3.0.
+  # OR 2.5
+  
+  acc_lim_ang: 1.25
+  
+  jerk_lim_lin: 0.2
+  jerk_lim_ang: 0.4
+  
+  manual_k_lin: false
+#  base_vel_k_lin: 1.5
+#  base_vel_k_ang: 1.5
+
+  base_vel_k_tan: 1.25
+  base_vel_k_nor: 1.25
+  base_vel_k_ang: 1.75
+
+# Goal Tolerance Parameters
+  goal_tolerance_ang: 0.05   # in radian? previously 0.3
+  goal_tolerance_lin: 0.05   # in metre,  previously 0.15
+  wp_tolerance_lin: 0.75      # trans waypoint tolerance in metre
+
+# Debugging
+  publish_traj_pc : true
+  publish_cost_grid_pc: true
+  global_frame_id: odom
+
+# Omni-drive robot configuration
+  holonomic_robot: true
+  
+  

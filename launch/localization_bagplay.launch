@@ -1,0 +1,21 @@
+<launch>
+    <arg name="use_sim_time" default="true"/>
+    <param name="use_sim_time" value="$(arg use_sim_time" />
+    
+    <!-- Map server -->
+    <arg name="map_file" default="$(find localization)/map/map.yaml"/>
+    <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" />
+    
+    <!--node pkg="localization" name="odometry_broadcaster" type="odometry_broadcaster">
+        <remap from="pose" to="/localization/pose" />
+    </node-->
+    
+    <node pkg="amcl" type="amcl" name="amcl">
+        <rosparam command="load" file="$(find localization)/params/amcl_params.yaml" />
+    </node>
+    
+    <!--node pkg="gmapping" type="slam_gmapping" name="gmapping" /-->
+    
+    <arg name="bag_file" default="$(find localization)/bag/2017-12-09-18-03-25.bag"/>
+    <node pkg="rosbag" type="play" name="player" output="screen" args="--clock $(arg bag_file)"/>
+</launch>

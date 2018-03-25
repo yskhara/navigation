@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<launch>
+	<!--
+	<arg name="port"   default="/dev/ttyUSB0"/>
+	<arg name="baud"   default="57600"/>
+	
+	<node pkg="rosserial_server" type="serial_node" name="rosserial_server">
+		<param name="port" value="$(arg port)" />
+		<param name="baud" value="$(arg baud)" />
+	</node>
+	-->
+	<group ns="odom">
+		<node pkg="localization" type="dummy_odom" name="dummy_odom">
+			<remap from="/odom/cmd_vel" to="/cmd_vel"/>
+			<!-- 
+			<remap from="twist" to="odometry/twist"/>
+			<remap from="imu" to="odometry/imu"/>
+			 -->
+		</node>
+		 
+		<node pkg="robot_localization" type="ekf_localization_node" name="ekf_localization" clear_params="true">
+			<rosparam command="load" file="$(find localization)/params/ekf.yaml" />
+			
+			<remap from="odometry/twist" to="twist"/>
+			<remap from="odometry/imu" to="imu"/>
+			<remap from="odometry/filtered" to="filtered"/>
+		    
+		    
+			<!--  Placeholder for output topic remapping
+			<remap from="odometry/filtered" to=""/>
+			<remap from="accel/filtered" to=""/>
+			-->
+		
+		</node>
+	</group>
+	 
+	 <!--
+	<node pkg="rosserial_python" type="message_info_service.py" name="rosserial_message_info" />
+	-->
+</launch>

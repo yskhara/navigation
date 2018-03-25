@@ -1,0 +1,18 @@
+<launch>
+	<arg name="port"   default="/dev/ttyUSB0"/>
+	<arg name="baud"   default="57600"/>
+	
+	<node pkg="rosserial_python" type="message_info_service.py" name="rosserial_message_info" />
+	
+	<group ns="localization">
+		<!-- odometry -->
+		<node pkg="rosserial_server" type="serial_node" name="rosserial_server">
+			<param name="port" value="$(arg port)" />
+			<param name="baud" value="$(arg baud)" />
+		</node>
+
+		<node pkg="localization" name="odometry_broadcaster" type="odometry_broadcaster"/>
+	
+    	<node pkg="tf" type="static_transform_publisher" name="laser_link_broadcaster" args="0.5 0 0 0 0 0 1 base_link laser 50" />
+	</group>
+</launch>

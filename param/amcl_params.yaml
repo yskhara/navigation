@@ -1,0 +1,45 @@
+# 
+# parameter file for amcl
+# 
+
+#update_min_d : 0.0
+#update_min_a : 0.0
+resample_interval : 2
+use_map_topic : false
+gui_publish_rate : -1.0
+save_pose_rate : 0.5
+laser_max_beams : 30
+min_particles : 500
+max_particles : 5000
+kld_err : 0.05
+kld_z : 0.99
+initial_pose_x : 0.0
+initial_pose_y : 0.0
+initial_pose_a : 0.0
+initial_cov_xx : 0.1 
+initial_cov_yy : 0.1
+initial_cov_aa : 0.1
+recovery_alpha_slow : 0.001
+recovery_alpha_fast : 0.1
+
+odom_model_type : omni-corrected
+laser_z_hit : 0.5
+laser_z_short : 0.05
+laser_z_max : 0.05
+laser_z_rand : 0.5
+laser_sigma_hit : 0.2
+laser_lambda_short : 0.1
+laser_model_type : likelihood_field
+#laser_model_type : beam
+laser_likelihood_max_dist : 2.0
+
+# alpha1: Specifies the expected noise in odometry's rotation estimate from the rotational component of the robot's motion.
+odom_alpha1 : 0.005
+# alpha2: Specifies the expected noise in odometry's rotation estimate from translational component of the robot's motion.
+odom_alpha2 : 0.005
+# alpha3: Specifies the expected noise in odometry's translation estimate from the translational component of the robot's motion.
+odom_alpha3 : 0.010
+# alpha4: Specifies the expected noise in odometry's translation estimate from the rotational component of the robot's motion.
+odom_alpha4 : 0.005
+# alpha5: Translation-related noise parameter (only used if model is "omni").
+odom_alpha5 : 0.003

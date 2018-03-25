@@ -1,0 +1,41 @@
+<launch>
+    <!-- Launch file for amcl demonstration -->
+
+    <!-- arguments -->
+    <arg name="laser_frame" default="laser_link" />
+    <arg name="use_amcl" default="true" />
+    <arg name="use_dummy_odom" default="false" />
+    <arg name="use_ekf" default="false" />
+    
+    <!-- odometry stuff -->
+    <include file="$(find navigation)/launch/deadreckoning.launch">
+        <arg name="use_dummy_odom" value="$(arg use_dummy_odom)" />
+        <arg name="use_ekf" value="$(arg use_ekf)" />
+    </include>
+    
+    <group if="$(arg use_amcl)">
+        <node pkg="amcl" type="amcl" name="amcl">
+            <rosparam command="load" file="$(find navigation)/param/amcl_params.yaml" />
+            <remap from="/nav/initialpose" to="/initialpose" />
+        </node>
+        
+        <node name="urg_node" pkg="urg_node" type="urg_node" output="screen">
+            <param name="ip_address"        value=""/>
+            <param name="serial_port"       value="/dev/ttyACM0"/>
+            <param name="serial_baud"       value="115200"/>
+            <param name="frame_id"          value="$(arg laser_frame)" />
+            <param name="skip"              value="5"/>
+            <param name="calibrate_time"    value="true"/>
+            <param name="publish_intensity" value="true"/>
+            <param name="publish_multiecho" value="false"/>
+            <param name="angle_min"         value="-1.58"/>
+            <param name="angle_max"         value="1.58"/>
+        </node>
+    </group>
+    
+    <group unless="$(arg use_amcl)">
+        <node pkg="tf" type="static_transform_publisher" name="map_to_odom" args="0 0 0 0 0 0 map odom 100"/>
+    </group>
+
+    
+</launch>

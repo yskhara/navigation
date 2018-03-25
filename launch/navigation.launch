@@ -1,0 +1,33 @@
+<launch>
+    <!-- Launch file for navigation -->
+
+    <!-- arguments -->
+    <arg name="map_file" default="$(find navigation)/map/abu2018_map.yaml" />
+    <arg name="use_amcl" default="true" />
+    <arg name="use_dummy_odom" default="false" />
+    <arg name="use_ekf" default="false" />
+    <arg name="laser_frame" default="laser_link" />
+    
+    <!-- <group ns="nav"> -->
+    
+	    <!-- Map server -->
+	    <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" />
+	    
+	    <!-- localization stuff, like odometry or amcl -->
+	    <include file="$(find navigation)/launch/localization.launch">
+	        <arg name="laser_frame" value="$(arg laser_frame)" />
+	        <arg name="use_amcl" value="$(arg use_amcl)" />
+            <arg name="use_dummy_odom" value="$(arg use_dummy_odom)" />
+            <arg name="use_ekf" value="$(arg use_ekf)" />
+	    </include>
+	    
+	    <!-- useless planner -->
+	    <include file="$(find navigation)/launch/useless_planner_test.launch">
+	    
+	    </include>
+	    
+	    <!-- node pkg="tf" type="static_transform_publisher" name="base_to_laser_link" args="0 0 0 0 0 0 base_link laser_link 100"/ -->
+	    <node pkg="tf" type="static_transform_publisher" name="laser_link_broadcaster" args="-0.3 0 0 3.1416 0 3.1416 base_link $(arg laser_frame) 100" />
+    
+    <!-- </group> -->
+</launch>
