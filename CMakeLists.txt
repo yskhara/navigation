@@ -207,6 +207,9 @@ target_link_libraries(odometry_broadcaster ${catkin_LIBRARIES})
 add_executable(dummy_odom src/dummy_odom.cpp)
 target_link_libraries(dummy_odom ${catkin_LIBRARIES})
 
+add_executable(dummy_amcl src/dummy_amcl.cpp)
+target_link_libraries(dummy_amcl ${catkin_LIBRARIES})
+
 
 
 

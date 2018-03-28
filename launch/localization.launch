@@ -34,7 +34,7 @@
     </group>
     
     <group unless="$(arg use_amcl)">
-        <node pkg="tf" type="static_transform_publisher" name="map_to_odom" args="0 0 0 0 0 0 map odom 100"/>
+        <node pkg="navigation" type="dummy_amcl" name="dummy_amcl" />
     </group>
 
     

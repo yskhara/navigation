@@ -2,8 +2,13 @@
 # parameter file for amcl
 # 
 
-#update_min_d : 0.0
-#update_min_a : 0.0
+# 10 mm
+#update_min_d : 0.01
+# pi / 32
+#update_min_a : 0.1
+
+update_min_d : 0.0
+update_min_a : 0.0
 resample_interval : 2
 use_map_topic : false
 gui_publish_rate : -1.0
