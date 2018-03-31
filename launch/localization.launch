@@ -6,11 +6,19 @@
     <arg name="use_amcl" default="true" />
     <arg name="use_dummy_odom" default="false" />
     <arg name="use_ekf" default="false" />
+    <arg name="odom_x_coeff" default="1.0" />
+    <arg name="odom_y_coeff" default="1.0" />
+    <arg name="odom_yaw_coeff" default="1.0" />
+    <arg name="odom_swap_xy" default="false" />
     
     <!-- odometry stuff -->
     <include file="$(find navigation)/launch/deadreckoning.launch">
         <arg name="use_dummy_odom" value="$(arg use_dummy_odom)" />
         <arg name="use_ekf" value="$(arg use_ekf)" />
+        <arg name="odom_x_coeff" value="$(arg odom_x_coeff)" />
+        <arg name="odom_y_coeff" value="$(arg odom_y_coeff)" />
+        <arg name="odom_yaw_coeff" value="$(arg odom_yaw_coeff)" />
+        <arg name="odom_swap_xy" value="$(arg odom_swap_xy)" />
     </include>
     
     <group if="$(arg use_amcl)">

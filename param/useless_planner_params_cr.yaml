@@ -1,0 +1,47 @@
+UselessPlanner:
+
+# Robot Configuration Parameters - CR
+
+  # 攻めたい．で，2.50とか？
+  # 安全にいくなら1.00とか
+  #vel_lim_lin: 2.50 # choose slightly less than the base's capability
+  vel_lim_lin: 2.50
+  
+  # vel_ang : 1.25 ; acc_ang : 1.25 ; k_ang : 2.00
+  #で振動した
+  vel_lim_ang: 1.00
+  
+#  acc_lim_lin: 2.0 # maximum is theoretically 2.0, but we 
+#  acc_lim_ang: 1.5
+  
+  acc_lim_lin: 3.00 # maximum is theoretically 3.0.
+  # OR 2.5
+  
+  acc_lim_ang: 0.50
+  dec_lim_ang: 2.00
+  
+  jerk_lim_lin: 0.2
+  jerk_lim_ang: 0.4
+  
+  manual_k_lin: false
+#  base_vel_k_lin: 1.5
+#  base_vel_k_ang: 1.5
+
+  base_vel_k_tan: 1.00
+  base_vel_k_nor: 1.00
+  base_vel_k_ang: 2.00
+
+# Goal Tolerance Parameters
+  goal_tolerance_ang: 0.05   # in radian? previously 0.3
+  goal_tolerance_lin: 0.05   # in metre,  previously 0.15
+  wp_tolerance_lin: 1.00      # trans waypoint tolerance in metre
+
+# Debugging
+  publish_traj_pc : true
+  publish_cost_grid_pc: true
+  global_frame_id: odom
+
+# Omni-drive robot configuration
+  holonomic_robot: true
+  
+  
