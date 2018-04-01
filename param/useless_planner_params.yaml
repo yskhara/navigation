@@ -28,10 +28,10 @@ UselessPlanner:
 #  base_vel_k_lin: 1.5
 #  base_vel_k_ang: 1.5
 
-  base_vel_k_tan: 1.25
+  base_vel_k_tan: 1.50
   base_vel_k_nor: 1.50
   #1.50で臨界ギリギリ手前くらいだった
-  base_vel_k_ang: 2.00
+  base_vel_k_ang: 2.50
 
 # Goal Tolerance Parameters
   goal_tolerance_ang: 0.05   # in radian? previously 0.3
