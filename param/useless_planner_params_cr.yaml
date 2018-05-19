@@ -32,7 +32,7 @@ UselessPlanner:
   base_vel_k_ang: 2.50
 
 # Goal Tolerance Parameters
-  goal_tolerance_ang: 0.05   # in radian? previously 0.3
+  goal_tolerance_ang: 0.05   # in radian, previously 0.3
   goal_tolerance_lin: 0.05   # in metre,  previously 0.15
   wp_tolerance_lin: 1.00      # trans waypoint tolerance in metre
 

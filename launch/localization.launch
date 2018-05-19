@@ -22,7 +22,7 @@
     </include>
     
     <group if="$(arg use_amcl)">
-        <node pkg="amcl" type="amcl" name="amcl">
+        <node pkg="amcl" type="amcl" name="amcl" respawn="true">
             <rosparam command="load" file="$(find navigation)/param/amcl_params.yaml" />
             <remap from="/nav/initialpose" to="/initialpose" />
         </node>
