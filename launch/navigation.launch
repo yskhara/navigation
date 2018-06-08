@@ -6,6 +6,7 @@
     <arg name="use_amcl" default="true" />
     <arg name="use_dummy_odom" default="false" />
     <arg name="use_ekf" default="false" />
+    <arg name="use_classic_urg" default="false" />
     <arg name="laser_frame" default="laser_link" />
     <arg name="odom_x_coeff" default="1.0" />
     <arg name="odom_y_coeff" default="1.0" />
@@ -23,6 +24,7 @@
 	        <arg name="laser_frame" value="$(arg laser_frame)" />
 	        <arg name="use_amcl" value="$(arg use_amcl)" />
             <arg name="use_dummy_odom" value="$(arg use_dummy_odom)" />
+            <arg name="use_classic_urg" default="$(arg use_classic_urg)" />
             <arg name="use_ekf" value="$(arg use_ekf)" />
             <arg name="odom_x_coeff" value="$(arg odom_x_coeff)" />
             <arg name="odom_y_coeff" value="$(arg odom_y_coeff)" />
@@ -36,7 +38,17 @@
         </node>
         
         <!-- node pkg="tf" type="static_transform_publisher" name="base_to_laser_link" args="0 0 0 0 0 0 base_link laser_link 100"/ -->
-        <node pkg="tf" type="static_transform_publisher" name="laser_link_broadcaster" args="-0.3 0 0 3.1416 0 3.1416 base_link $(arg laser_frame) 100" />
-    
+        <node pkg="tf" type="static_transform_publisher" name="laser_link_broadcaster" 
+            unless="$(arg use_classic_urg)"
+            args="-0.3 0 0 3.1416 0 3.1416 base_link $(arg laser_frame) 100" />
+            
+        <node pkg="tf" type="static_transform_publisher" name="laser_link_broadcaster" 
+            if="$(arg use_classic_urg)"
+            args="-0.1376 -0.2384 0 -2.0944 0 3.1416 base_link $(arg laser_frame) 100" />
+            <!--args="-0.1376 -0.2384 0 -2.050 0 3.1416 base_link $(arg laser_frame) 100" /-->
+            <!--args="-0.1376 -0.2384 0 -2.0450 0 3.1416 base_link $(arg laser_frame) 100" />-->
+            <!--args="-0.1376 -0.2384 0 -2.0944 0 3.1416 base_link $(arg laser_frame) 100" /-->
+        
+        
     <!-- </group> -->
 </launch>

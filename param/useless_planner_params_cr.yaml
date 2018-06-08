@@ -2,23 +2,20 @@ UselessPlanner:
 
 # Robot Configuration Parameters - CR
 
-  # 攻めたい．で，2.50とか？
-  # 安全にいくなら1.00とか
-  #vel_lim_lin: 2.50 # choose slightly less than the base's capability
-  vel_lim_lin: 2.00
+  vel_lim_lin: 2.50 # choose slightly less than the base's capability
   
-  # vel_ang : 1.25 ; acc_ang : 1.25 ; k_ang : 2.00
-  #で振動した
-  vel_lim_ang: 0.75
+  # 遅い？
+  # 回転角速度の最大値を上げるとき，k_angを適度に小さくしなきゃいけないと思う
+  vel_lim_ang: 1.00
   
 #  acc_lim_lin: 2.0 # maximum is theoretically 2.0, but we 
 #  acc_lim_ang: 1.5
   
-  acc_lim_lin: 2.75 # maximum is theoretically 3.0.
+  acc_lim_lin: 3.00 # maximum is theoretically 3.0.
   # OR 2.5
   
-  acc_lim_ang: 0.75
-  dec_lim_ang: 2.00
+  acc_lim_ang: 1.50
+  dec_lim_ang: 2.50
   
   jerk_lim_lin: 0.2
   jerk_lim_ang: 0.4
@@ -27,14 +24,29 @@ UselessPlanner:
 #  base_vel_k_lin: 1.5
 #  base_vel_k_ang: 1.5
 
-  base_vel_k_tan: 1.50
-  base_vel_k_nor: 1.50
-  base_vel_k_ang: 2.50
+  base_vel_k_tan: 1.25
+  # k_nor 1.00 だと，DP1->PP2のとき角に当たる
+  #base_vel_k_nor: 1.25
+  #角に当たるからといって1.25にしていたけど，何故か今度は後ろに当たるようになってしまった
+  #ので，1.00に戻してみる
+  #base_vel_k_nor: 1.00
+  #１番のモータ換えたら角に当たるようになった
+  base_vel_k_nor: 1.25
+  
+  # 4/1の撮影はk_ang = 2.50でやった
+  #base_vel_k_ang: 1.75
+  base_vel_k_ang: 1.00
 
 # Goal Tolerance Parameters
-  goal_tolerance_ang: 0.05   # in radian, previously 0.3
-  goal_tolerance_lin: 0.05   # in metre,  previously 0.15
-  wp_tolerance_lin: 1.00      # trans waypoint tolerance in metre
+  goal_tolerance_ang: 0.025   # in radian, previously 0.3
+  goal_tolerance_lin: 0.025   # in metre,  previously 0.15
+  wp_tolerance_lin: 1.50      # trans waypoint tolerance in metre
+  
+  tan_half_value_diff_nor: -1.00
+  rot_half_value_diff_nor: -1.00
+  rot_half_value_diff_tan: -1.00
+  
+  plan_safely: false
 
 # Debugging
   publish_traj_pc : true

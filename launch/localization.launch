@@ -4,6 +4,7 @@
     <!-- arguments -->
     <arg name="laser_frame" default="laser_link" />
     <arg name="use_amcl" default="true" />
+    <arg name="use_classic_urg" default="false" />
     <arg name="use_dummy_odom" default="false" />
     <arg name="use_ekf" default="false" />
     <arg name="odom_x_coeff" default="1.0" />
@@ -27,17 +28,22 @@
             <remap from="/nav/initialpose" to="/initialpose" />
         </node>
         
-        <node name="urg_node" pkg="urg_node" type="urg_node" output="screen">
+        <node name="urg_node" pkg="urg_node" type="urg_node" output="screen" respawn="true">
             <param name="ip_address"        value=""/>
             <param name="serial_port"       value="/dev/ttyACM0"/>
             <param name="serial_baud"       value="115200"/>
             <param name="frame_id"          value="$(arg laser_frame)" />
-            <param name="skip"              value="5"/>
-            <param name="calibrate_time"    value="true"/>
-            <param name="publish_intensity" value="true"/>
-            <param name="publish_multiecho" value="false"/>
-            <param name="angle_min"         value="-1.58"/>
-            <param name="angle_max"         value="1.58"/>
+            
+            <param name="skip" if="$(arg use_classic_urg)"          value="1"/>
+            <param name="skip" unless="$(arg use_classic_urg)"      value="5"/>
+            <param name="calibrate_time" 							value="true"/>
+            <!--param name="publish_intensity" value="true"/-->
+            <param name="publish_intensity"                         value="false"/>
+            <param name="publish_multiecho"                         value="false"/>
+            <param name="angle_min" if="$(arg use_classic_urg)"     value="-1.90"/>
+            <param name="angle_max" if="$(arg use_classic_urg)"     value="1.90"/>
+            <param name="angle_min" unless="$(arg use_classic_urg)" value="-1.58"/>
+            <param name="angle_max" unless="$(arg use_classic_urg)" value="1.58"/>
         </node>
     </group>
     
