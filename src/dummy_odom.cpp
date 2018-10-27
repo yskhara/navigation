@@ -4,7 +4,7 @@
 #include <geometry_msgs/TwistWithCovarianceStamped.h>
 #include <geometry_msgs/Twist.h>
 #include <geometry_msgs/PoseStamped.h>
-#include <sensor_msgs/Imu.h>
+#include <tf/tf.h>
 
 class DummyOdom
 {
@@ -13,16 +13,21 @@ private:
 
 	ros::Subscriber cmd_vel_sub;
 	ros::Publisher pose_pub;
-	//ros::Publisher imu_pub;
+
+	int control_freq;
+	double control_interval;
 
 	ros::Timer timer;
 
 	geometry_msgs::PoseStamped pose_msg;
-	//sensor_msgs::Imu imu_msg;
 
-	ros::Time last_time;
+    std::string odom_frame;
 
 	double yaw = 0.0;
+
+	double vx = 0.0;
+	double vy = 0.0;
+	double vz = 0.0;
 
 public:
 	DummyOdom(void);
@@ -33,60 +38,42 @@ public:
 
 DummyOdom::DummyOdom(void)
 {
+    auto _nh = ros::NodeHandle("~");
+    _nh.param<std::string>("odom_frame", odom_frame, "odom");
+    _nh.param<int>("freq", control_freq, 200);
+
+    control_interval = 1.0 / control_freq;
+
 	this->cmd_vel_sub = n.subscribe("cmd_vel", 10, &DummyOdom::cmd_velCallback, this);
-
-	//this->twist_pub = n.advertise<geometry_msgs::TwistWithCovarianceStamped>("twist", 50);
-	//this->imu_pub = n.advertise<sensor_msgs::Imu>("imu", 50);
-	this->pose_pub = n.advertise<geometry_msgs::PoseStamped>("pose", 50);
-
+	this->pose_pub = n.advertise<geometry_msgs::PoseStamped>("odom_pose", 1);
 	this->timer = n.createTimer(ros::Duration(0.1), &DummyOdom::timerCallback, this);
+
+    this->pose_msg.pose.position.x = 0;
+    this->pose_msg.pose.position.y = 0;
+    this->pose_msg.pose.orientation = tf::createQuaternionMsgFromYaw(0.0);
 }
 
 void DummyOdom::cmd_velCallback(const geometry_msgs::Twist::ConstPtr &msg)
 {
-	static bool _first = true;
-	if(_first)
-	{
-		this->last_time = ros::Time::now();
-		_first = false;
-	}
-
-	ros::Time this_time = ros::Time::now();
-	double t_delta = this_time.toSec() - last_time.toSec();
-
-	this->pose_msg.pose.position.x += ((msg->linear.x * cos(yaw)) - (msg->linear.y * sin(yaw))) * t_delta;
-	this->pose_msg.pose.position.y += ((msg->linear.x * sin(yaw)) + (msg->linear.y * cos(yaw))) * t_delta;
-
-	this->yaw += msg->angular.z * t_delta;
-
-	last_time = this_time;
+    this->vx = msg->linear.x;
+    this->vy = msg->linear.y;
+    this->vz = msg->angular.z;
 }
 
 void DummyOdom::timerCallback(const ros::TimerEvent &event)
 {
-	//this->twist_msg.header.stamp = ros::Time::now();
-	//this->twist_msg.header.frame_id = "base_link";
-	//this->twist_msg.twist.twist.linear.x = 0.25;
-	//this->twist_msg.twist.twist.linear.y = 0.25;
+    this->pose_msg.header.stamp = ros::Time::now();
+    this->pose_msg.header.frame_id = odom_frame;
 
-	this->pose_msg.header.stamp = ros::Time::now();
-	this->pose_msg.header.frame_id = "odom";
-	//this->imu_msg.angular_velocity.z = M_PI / 2.0;
+    double t_delta = (event.current_real - event.last_real).toSec();
+    this->pose_msg.pose.position.x += ((this->vx * cos(yaw)) - (this->vy * sin(yaw))) * t_delta;
+    this->pose_msg.pose.position.y += ((this->vx * sin(yaw)) + (this->vy * cos(yaw))) * t_delta;
 
-	//[0.02,0,0,0,0.02,0,0,0,0.02];
-	//double var = 0.02;
-	//this->imu_msg.angular_velocity_covariance[0] = var;
-	//this->imu_msg.angular_velocity_covariance[4] = var;
-	//this->imu_msg.angular_velocity_covariance[8] = var;
+    this->yaw += this->vz * t_delta;
 
 	this->pose_msg.pose.orientation = tf::createQuaternionMsgFromYaw(this->yaw);
-	//this->pose_msg.pose.orientation.x = q.x;
-	//this->pose_msg.pose.orientation.y = q.y;
-	//this->pose_msg.pose.orientation.z = q.z;
-	//this->pose_msg.pose.orientation.w = q.w;
 
 	this->pose_pub.publish(this->pose_msg);
-	//this->imu_pub.publish(this->imu_msg);
 }
 
 int main(int argc, char** argv)

@@ -12,80 +12,68 @@ private:
 	ros::NodeHandle n;
 
 	// stuff to publish
-	ros::Publisher odom_pub;
+	//ros::Publisher odom_pub;
 	tf::TransformBroadcaster odom_broadcaster;
 
 	// stuff to subscribe to
-	ros::Subscriber nav_pose_sub;
-	ros::Subscriber base_odom_x_sub;
-	ros::Subscriber base_odom_y_sub;
-	ros::Subscriber base_odom_yaw_sub;
+	ros::Subscriber odom_pose_sub;
+	//ros::Subscriber base_odom_x_sub;
+	//ros::Subscriber base_odom_y_sub;
+	//ros::Subscriber base_odom_yaw_sub;
 
 	ros::Timer timer;
 
 	// local storage
 
 	// last pose estimate that reported by odometry unit
-	geometry_msgs::Pose2D last_pose;
-	// current pose estimate that could be inaccurate.
-	geometry_msgs::Pose2D current_pose;
-	geometry_msgs::Twist last_twist;
-	ros::Time last_pose_time;
-	bool last_pose_updated = true;
+	geometry_msgs::PoseStamped last_pose;
 
-	ros::Time last_x_time;
-	ros::Time last_y_time;
-	ros::Time last_yaw_time;
+	//ros::Time last_pose_time;
+	bool last_pose_updated = false;
 
-	double _x_coeff;
-	double _y_coeff;
-	double _yaw_coeff;
-	bool _swap_xy;
+	//ros::Time last_x_time;
+	//ros::Time last_y_time;
+	//ros::Time last_yaw_time;
 
-	nav_msgs::Odometry odom_msg;
+	//double _x_coeff;
+	//double _y_coeff;
+	//double _yaw_coeff;
+	//bool _swap_xy;
 
-	void update_x(const double x);
-	void update_y(const double y);
-	void update_yaw(const double yaw);
+	//nav_msgs::Odometry odom_msg;
 
-	static constexpr double TimerInterval = 0.1;
-	// expecting 0.1 second interval; 100 percent margin
-	static constexpr double PoseTimeoutThreshold = 0.2;
+	double timer_freq = 10;
+	std::string odom_frame;
+	std::string base_frame;
 
 public:
 	OdomertyBroadcaster(void);
 
-	void baseOdomXCallback(const std_msgs::Float64::ConstPtr &msg);
-	void baseOdomYCallback(const std_msgs::Float64::ConstPtr &msg);
-	void baseOdomYawCallback(const std_msgs::Float64::ConstPtr &msg);
-
 	//void poseCallback(const geometry_msgs::PoseStamped::ConstPtr &pose);
-	void navPoseCallback(const geometry_msgs::Pose2D::ConstPtr &msg);
+	void odomPoseCallback(const geometry_msgs::PoseStamped::ConstPtr &msg);
 	void timerCallback(const ros::TimerEvent &event);
 };
 
 OdomertyBroadcaster::OdomertyBroadcaster(void)
 {
-	this->odom_pub = n.advertise<nav_msgs::Odometry>("odom", 50);
+	//this->odom_pub = n.advertise<nav_msgs::Odometry>("odom", 10);
 
-	this->base_odom_x_sub = n.subscribe<std_msgs::Float64, OdomertyBroadcaster>("base/odom/x", 20, &OdomertyBroadcaster::baseOdomXCallback, this);
-	this->base_odom_y_sub = n.subscribe<std_msgs::Float64, OdomertyBroadcaster>("base/odom/y", 20, &OdomertyBroadcaster::baseOdomYCallback, this);
-	this->base_odom_yaw_sub = n.subscribe<std_msgs::Float64, OdomertyBroadcaster>("base/odom/yaw", 20, &OdomertyBroadcaster::baseOdomYawCallback, this);
+    this->odom_pose_sub = n.subscribe<geometry_msgs::PoseStamped>("odom_pose", 10, &OdomertyBroadcaster::odomPoseCallback, this);
 
-	// 10 Hz
-	ros::Duration duration(TimerInterval);
-	this->timer = n.createTimer(duration, &OdomertyBroadcaster::timerCallback, this);
+	auto _nh = ros::NodeHandle("~");
+	_nh.param("freq", this->timer_freq, 10.0);
+	_nh.param<std::string>("odom_frame", this->odom_frame, "odom");
+	_nh.param<std::string>("base_frame", this->base_frame, "base_link");
 
-	this->last_pose_time = ros::Time::now();
-	this->last_pose.x = 0.0;
-	this->last_pose.y = 0.0;
-	this->last_pose.theta = 0.0;
+    // 10 Hz
+    this->timer = n.createTimer(ros::Rate(timer_freq), &OdomertyBroadcaster::timerCallback, this);
+}
 
-	auto private_nh = ros::NodeHandle("~");
-	private_nh.param("x_coeff", this->_x_coeff, 1.0);
-	private_nh.param("y_coeff", this->_y_coeff, 1.0);
-	private_nh.param("yaw_coeff", this->_yaw_coeff, 1.0);
-	private_nh.param("swap_xy", this->_swap_xy, false);
+
+void OdomertyBroadcaster::odomPoseCallback(const geometry_msgs::PoseStamped::ConstPtr &msg)
+{
+    this->last_pose = geometry_msgs::PoseStamped(*msg);
+    last_pose_updated = true;
 }
 
 void OdomertyBroadcaster::timerCallback(const ros::TimerEvent &event)
@@ -109,21 +97,28 @@ void OdomertyBroadcaster::timerCallback(const ros::TimerEvent &event)
 	}
 #endif
 
+	if(!last_pose_updated)
+	{
+	    return;
+	}
+
 	//since all odometry is 6DOF we'll need a quaternion created from yaw
-	geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(current_pose.theta);
+	//geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(current_pose.theta);
 
 	//first, we'll publish the transform over tf
 	geometry_msgs::TransformStamped odom_trans;
 	odom_trans.header.stamp = event.current_real;
-	odom_trans.header.frame_id = "odom";
-	odom_trans.child_frame_id = "base_link";
+	odom_trans.header.frame_id = odom_frame;
+	odom_trans.child_frame_id = base_frame;
 
-	odom_trans.transform.translation.x = current_pose.x;
-	odom_trans.transform.translation.y = current_pose.y;
-	odom_trans.transform.rotation = odom_quat;
+	odom_trans.transform.translation.x = last_pose.pose.position.x;
+	odom_trans.transform.translation.y = last_pose.pose.position.y;
+	odom_trans.transform.rotation = last_pose.pose.orientation;
 
 	//send the transform
 	odom_broadcaster.sendTransform(odom_trans);
+
+#ifdef PUBLISH_ODOM_MSG
 
 	//next, we'll publish the odometry message over ROS
 	nav_msgs::Odometry odom;
@@ -143,59 +138,7 @@ void OdomertyBroadcaster::timerCallback(const ros::TimerEvent &event)
 
 	//publish the message
 	odom_pub.publish(odom);
-}
-
-void OdomertyBroadcaster::update_x(const double x)
-{
-	last_pose.x = current_pose.x;
-	current_pose.x = x * this->_x_coeff;
-	last_twist.linear.x = (current_pose.x - last_pose.x) / (ros::Time::now() - last_x_time).toSec();
-	last_x_time = ros::Time::now();
-}
-
-void OdomertyBroadcaster::update_y(const double y)
-{
-	last_pose.y = current_pose.y;
-	current_pose.y = y * this->_y_coeff;
-	last_twist.linear.y = (current_pose.y - last_pose.y) / (ros::Time::now() - last_y_time).toSec();
-	last_y_time = ros::Time::now();
-}
-
-void OdomertyBroadcaster::update_yaw(const double yaw)
-{
-	last_pose.theta = current_pose.theta;
-	current_pose.theta = yaw * this->_yaw_coeff;
-	last_twist.angular.z = (current_pose.theta - last_pose.theta) / (ros::Time::now() - last_yaw_time).toSec();
-	last_yaw_time = ros::Time::now();
-}
-
-void OdomertyBroadcaster::baseOdomXCallback(const std_msgs::Float64::ConstPtr &msg)
-{
-	if(this->_swap_xy)
-	{
-		this->update_y(msg->data);
-	}
-	else
-	{
-		this->update_x(msg->data);
-	}
-}
-
-void OdomertyBroadcaster::baseOdomYCallback(const std_msgs::Float64::ConstPtr &msg)
-{
-	if(this->_swap_xy)
-	{
-		this->update_x(msg->data);
-	}
-	else
-	{
-		this->update_y(msg->data);
-	}
-}
-
-void OdomertyBroadcaster::baseOdomYawCallback(const std_msgs::Float64::ConstPtr &msg)
-{
-	this->update_yaw(msg->data);
+#endif
 }
 
 int main(int argc, char** argv)
