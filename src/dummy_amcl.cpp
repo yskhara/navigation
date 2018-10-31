@@ -57,7 +57,7 @@ void DummyAmcl::initialposeCallback(const geometry_msgs::PoseWithCovarianceStamp
 		return;
 	}
 
-	ROS_INFO("received initial pose.")
+	ROS_INFO("received initial pose.");
 
 	tf::Transform pose_tf;
 	pose_tf.setOrigin(tf::Vector3(msg->pose.pose.position.x, msg->pose.pose.position.y, msg->pose.pose.position.z));
